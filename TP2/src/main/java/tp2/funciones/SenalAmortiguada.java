@@ -33,6 +33,6 @@ public class SenalAmortiguada implements Funcion {
 
     @Override
     public String getNombre() {
-        return "Senal Amortiguada";
+        return "Señal Amortiguada";
     }
 }

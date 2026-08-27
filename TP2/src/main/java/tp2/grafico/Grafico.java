@@ -12,14 +12,19 @@ public class Grafico extends JPanel {
     private double tiempoInicial;
     private double tiempoFinal;
 
+    // Período de muestreo (Ts) de la implementación digital de la señal.
+    private double periodoMuestreo;
+
     public Grafico(
             Funcion funcion,
             double tiempoInicial,
-            double tiempoFinal) {
+            double tiempoFinal,
+            double periodoMuestreo) {
 
         this.funcion = funcion;
         this.tiempoInicial = tiempoInicial;
         this.tiempoFinal = tiempoFinal;
+        this.periodoMuestreo = periodoMuestreo;
 
         setBackground(Color.WHITE);
     }
@@ -53,10 +58,17 @@ public class Grafico extends JPanel {
                 alto - margenSuperior - margenInferior;
 
         // ==========================================
-        // CALCULAR LOS VALORES
+        // MUESTREO DIGITAL: x[n] = x(n·Ts)
         // ==========================================
+        // La cantidad de muestras depende del período de muestreo (Ts),
+        // no del ancho en píxeles de la ventana: así la señal queda
+        // implementada en forma digital de verdad (independiente de
+        // cómo se la dibuje o del tamaño de la ventana).
 
-        int cantidadPuntos = anchoGrafico;
+        int cantidadPuntos =
+                (int) Math.floor(
+                        (tiempoFinal - tiempoInicial) / periodoMuestreo
+                ) + 1;
 
         double[] tiempos =
                 new double[cantidadPuntos];
@@ -72,9 +84,7 @@ public class Grafico extends JPanel {
 
             double t =
                     tiempoInicial
-                            + (tiempoFinal - tiempoInicial)
-                            * i
-                            / (cantidadPuntos - 1);
+                            + i * periodoMuestreo;
 
             tiempos[i] = t;
 
@@ -343,39 +353,25 @@ public class Grafico extends JPanel {
         );
 
         // ==========================================
-        // DIBUJAR LA FUNCIÓN
+        // DIBUJAR LA SEÑAL DIGITAL (muestras x[n])
         // ==========================================
+        // Cada muestra se dibuja como un "stem": una línea vertical
+        // desde el cero hasta el valor, con un punto en la punta.
+        // Así se ve que la señal está formada por muestras discretas
+        // y no por una curva continua.
 
-        grafico.setColor(Color.BLUE);
+        int radioMarcador = 3;
 
-        grafico.setStroke(
-                new BasicStroke(
-                        2.5f
-                )
-        );
+        for (int i = 0; i < cantidadPuntos; i++) {
 
-        for (int i = 1;
-             i < cantidadPuntos;
-             i++) {
-
-            int x1 =
-                    izquierda
-                            + i - 1;
-
-            int x2 =
-                    izquierda
-                            + i;
-
-            int y1 =
-                    convertirY(
-                            valores[i - 1],
-                            arriba,
-                            abajo,
-                            minimo,
-                            maximo
+            int x =
+                    convertirX(
+                            tiempos[i],
+                            izquierda,
+                            derecha
                     );
 
-            int y2 =
+            int y =
                     convertirY(
                             valores[i],
                             arriba,
@@ -384,11 +380,26 @@ public class Grafico extends JPanel {
                             maximo
                     );
 
+            grafico.setColor(new Color(30, 100, 220, 120));
+
+            grafico.setStroke(
+                    new BasicStroke(1.5f)
+            );
+
             grafico.drawLine(
-                    x1,
-                    y1,
-                    x2,
-                    y2
+                    x,
+                    posicionCeroY,
+                    x,
+                    y
+            );
+
+            grafico.setColor(Color.BLUE);
+
+            grafico.fillOval(
+                    x - radioMarcador,
+                    y - radioMarcador,
+                    radioMarcador * 2,
+                    radioMarcador * 2
             );
         }
 
@@ -420,6 +431,36 @@ public class Grafico extends JPanel {
                         + String.format("%.2f", maximo),
                 derecha - 180,
                 55
+        );
+
+        grafico.drawString(
+                "Ts = "
+                        + periodoMuestreo
+                        + " ("
+                        + cantidadPuntos
+                        + " muestras)",
+                derecha - 180,
+                75
+        );
+    }
+
+    // =================================================
+    // CONVERTIR TIEMPO A POSICIÓN EN PANTALLA
+    // =================================================
+
+    private int convertirX(
+            double t,
+            int izquierda,
+            int derecha) {
+
+        double proporcion =
+                (t - tiempoInicial)
+                        / (tiempoFinal - tiempoInicial);
+
+        return (int) (
+                izquierda
+                        + proporcion
+                        * (derecha - izquierda)
         );
     }
 

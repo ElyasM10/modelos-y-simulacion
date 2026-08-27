@@ -21,7 +21,7 @@ public class Main {
                         2
                 );
 
-        VentanaGrafico.mostrar(escalon);
+        VentanaGrafico.mostrar(escalon, 0.2);
 
         // SENO
         System.out.println("Graficando Seno");
@@ -32,7 +32,7 @@ public class Main {
                         0
                 );
 
-        VentanaGrafico.mostrar(seno);
+        VentanaGrafico.mostrar(seno, 0.05);
 
         // EXPONENCIAL+
         System.out.println("Graficando Exponencial");
@@ -43,7 +43,7 @@ public class Main {
                         0
                 );
 
-        VentanaGrafico.mostrar(exponencial);
+        VentanaGrafico.mostrar(exponencial, 0.2);
 
 
         // SEÑAL AMORTIGUADA
@@ -56,7 +56,7 @@ public class Main {
                         -0.3
                 );
 
-        VentanaGrafico.mostrar(amortiguada);
+        VentanaGrafico.mostrar(amortiguada, 0.05);
 
 
 
@@ -69,7 +69,7 @@ public class Main {
                         3
                 );
 
-        VentanaGrafico.mostrar(pulso);
+        VentanaGrafico.mostrar(pulso, 0.1);
 
 
 

@@ -22,6 +22,6 @@ public class Escalon implements Funcion {
 
     @Override
     public String getNombre() {
-        return "Escalon";
+        return "Escalón";
     }
 }
