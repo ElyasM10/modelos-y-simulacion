@@ -139,7 +139,7 @@ public class Main {
 
 
     // EJERCICIO 3: polinomios de grado 1, 2, 3 y 4
-
+/*
     private static void ejercicio3() {
 
         System.out.println("=== Ejercicio 3: polinomios de grado 1 a 4 ===");
@@ -178,7 +178,47 @@ public class Main {
 
         VentanaGraficoAjuste.mostrar("Ejercicio 3 - Polinomios", grafico, "Ejercicio3_Polinomios");
     }
+*/
+    private static void ejercicio3() {
 
+        System.out.println("=== Ejercicio 3: polinomios de grado 1 a 4 ===");
+
+        double[] x = {0, 0.15, 0.31, 0.5, 0.6, 0.75};
+        double[] y = {1.0, 1.004, 1.031, 1.117, 1.223, 1.422};
+
+        Color[] colores = {Color.BLUE, Color.RED, new Color(0, 150, 0), Color.MAGENTA};
+
+        for (int grado = 1; grado <= 4; grado++) {
+
+            double[] coeficientes = CuadradosMinimos.ajustarPolinomio(x, y, grado);
+
+            double[] yPredicho = evaluarEnTodos(coeficientes, x);
+            double r = Pearson.coeficiente(y, yPredicho);
+
+            String ecuacion = FormatoEcuacion.polinomio(coeficientes);
+
+            System.out.println(
+                    "Grado " + grado + ": " + ecuacion
+                            + "  |  Pearson r = " + String.format("%.4f", r)
+            );
+
+            List<Curva> curvas = new ArrayList<>();
+            curvas.add(new Curva(
+                    t -> CuadradosMinimos.evaluarPolinomio(coeficientes, t),
+                    "Grado " + grado + " (r=" + String.format("%.4f", r) + ")",
+                    colores[grado - 1]
+            ));
+
+            String titulo = "Grado " + grado + ":  " + ecuacion
+                    + "   (r=" + String.format("%.4f", r) + ")";
+
+            GraficoAjuste grafico = new GraficoAjuste(titulo, x, y, curvas);
+
+            VentanaGraficoAjuste.mostrar(titulo, grafico, "Ejercicio3_Grado" + grado);
+        }
+
+        System.out.println();
+    }
     // EJERCICIO 4: tercera ley de Kepler T = C . x^A
 
     private static void ejercicio4() {
