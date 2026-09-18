@@ -11,26 +11,37 @@ la matriz de coeficientes técnicos, `y` el vector de demanda final y `x` el
 vector de producción total. Cuando la demanda final varía en `Δy`, el efecto
 sobre la producción es `Δx = (I - A)^-1 · Δy`.
 
-Todo el álgebra lineal (resolución de sistemas y producto matriz-vector) se
-resuelve con [Apache Commons Math](https://commons.apache.org/proper/commons-math/)
-(`LUDecomposition` para `(I - A)·x = y`, `RealMatrix.operate` para aplicar una
-inversa ya conocida), sin reimplementar Gauss a mano. Por cada ejercicio se
-muestra además un gráfico de barras (uno por sector) con los valores
-resultantes, en una ventana Swing que también se exporta a PNG en
+Todo el álgebra lineal (resolución de sistemas y producto matriz-vector) está
+resuelta **sin librerías externas**: eliminación de Gauss con pivoteo parcial
+y sustitución hacia atrás, escrita a mano igual que en TP2/TP3. Por cada
+ejercicio se muestra además un gráfico de barras (uno por sector) con los
+valores resultantes, en una ventana Swing que también se exporta a PNG en
 `graficos/`.
+
+También existe, a modo de comparación, una versión equivalente con
+[Apache Commons Math](https://commons.apache.org/proper/commons-math/)
+(`LUDecomposition` para `(I - A)·x = y`, `RealMatrix.operate` para aplicar una
+inversa ya conocida) — está en `LeontiefApacheCommonsMath.java`, **comentada a
+propósito**. Para probarla: descomentar esa clase y comentar/borrar
+`Leontief.java` (no pueden coexistir, se llaman igual). La dependencia de
+Apache Commons Math ya está declarada en el `pom.xml` para cuando haga falta.
+Da exactamente los mismos resultados numéricos que la versión sin librería.
 
 ## Estructura
 
 ```
 src/main/java/tp4/
-├── Main.java               # los 4 ejercicios: datos de cada uno y llamadas
+├── Main.java                          # los 4 ejercicios: datos de cada uno y llamadas
+├── algebra/
+│   └── SistemaLineal.java             # A·x=b por Gauss con pivoteo parcial (sin librerías)
 ├── leontief/
-│   └── Leontief.java       # produccion() y aplicarInversa() sobre RealMatrix/RealVector
+│   ├── Leontief.java                  # ACTIVA: produccion() y aplicarInversa(), sin librerías
+│   └── LeontiefApacheCommonsMath.java # alternativa con Apache Commons Math, comentada
 ├── reporte/
-│   └── Reporte.java        # impresión formateada de un vector por sector (consola)
+│   └── Reporte.java                   # impresión formateada de un vector por sector (consola)
 └── grafico/
-    ├── GraficoBarras.java  # dibuja un vector de valores por sector como barras
-    └── VentanaGrafico.java # ventana Swing + export a PNG
+    ├── GraficoBarras.java             # dibuja un vector de valores por sector como barras
+    └── VentanaGrafico.java            # ventana Swing + export a PNG
 ```
 
 ## Cómo correrlo

@@ -1,6 +1,6 @@
 package tp4;
 
-import org.apache.commons.math3.linear.RealVector;
+// import org.apache.commons.math3.linear.RealVector; // solo hace falta con la versión con librería (ver tp4.leontief.LeontiefApacheCommonsMath)
 import tp4.grafico.GraficoBarras;
 import tp4.grafico.VentanaGrafico;
 import tp4.leontief.Leontief;
@@ -8,6 +8,10 @@ import tp4.reporte.Reporte;
 
 import java.awt.Color;
 
+// Con la versión sin librerías, Leontief.produccion()/aplicarInversa() devuelven double[]
+// (usado abajo). Con la versión con Apache Commons Math (comentada), devuelven RealVector,
+// y habría que reemplazar cada "double[] x" / "double[] deltaX" por "RealVector x" / "RealVector deltaX",
+// y "x" / "deltaX" por "x.toArray()" / "deltaX.toArray()" al pasarlos a GraficoBarras.
 public class Main {
 
     public static void main(String[] args) {
@@ -44,7 +48,7 @@ public class Main {
 
         double[] y = {200, 150};
 
-        RealVector x = Leontief.produccion(a, y);
+        double[] x = Leontief.produccion(a, y);
 
         Reporte.imprimirVector("Vector de producción x", sectores, x);
         System.out.println();
@@ -52,7 +56,7 @@ public class Main {
         GraficoBarras grafico = new GraficoBarras(
                 "Ejercicio 1 - Producción total x",
                 sectores,
-                x.toArray(),
+                x,
                 "Producción",
                 new Color(50, 110, 200)
         );
@@ -78,7 +82,7 @@ public class Main {
 
         double[] deltaY = {0, 50, 0};
 
-        RealVector deltaX = Leontief.aplicarInversa(inversa, deltaY);
+        double[] deltaX = Leontief.aplicarInversa(inversa, deltaY);
 
         Reporte.imprimirVector("Efecto Δx sobre cada sector", sectores, deltaX);
         System.out.println();
@@ -86,7 +90,7 @@ public class Main {
         GraficoBarras grafico = new GraficoBarras(
                 "Ejercicio 2 - Efecto Δx (+50 en Transporte)",
                 sectores,
-                deltaX.toArray(),
+                deltaX,
                 "Δx",
                 new Color(200, 90, 40)
         );
@@ -112,7 +116,7 @@ public class Main {
 
         double[] y = {100, 150, 80, 120};
 
-        RealVector x = Leontief.produccion(a, y);
+        double[] x = Leontief.produccion(a, y);
 
         Reporte.imprimirVector("Vector de producción total x", sectores, x);
         System.out.println();
@@ -120,7 +124,7 @@ public class Main {
         GraficoBarras grafico = new GraficoBarras(
                 "Ejercicio 3 - Producción total x",
                 sectores,
-                x.toArray(),
+                x,
                 "Producción",
                 new Color(50, 110, 200)
         );
@@ -148,7 +152,7 @@ public class Main {
 
         double[] deltaY = {0, 0, 100, 0, 0};
 
-        RealVector deltaX = Leontief.aplicarInversa(inversa, deltaY);
+        double[] deltaX = Leontief.aplicarInversa(inversa, deltaY);
 
         Reporte.imprimirVector("Efecto Δx sobre cada sector", sectores, deltaX);
         System.out.println();
@@ -156,7 +160,7 @@ public class Main {
         GraficoBarras grafico = new GraficoBarras(
                 "Ejercicio 4 - Efecto Δx (+100 en Energía)",
                 sectores,
-                deltaX.toArray(),
+                deltaX,
                 "Δx",
                 new Color(200, 90, 40)
         );

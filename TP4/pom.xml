@@ -8,6 +8,13 @@
   <name>TP4-Modelos-Simulacion</name>
   <url>http://maven.apache.org</url>
   <dependencies>
+    <!--
+      Solo hace falta si se descomenta la versión con librería de
+      tp4.leontief.LeontiefApacheCommonsMath (ver ese archivo). La versión
+      activa por defecto (tp4.leontief.Leontief) no usa ninguna dependencia
+      externa. Se deja declarada para poder probar la otra versión sin tener
+      que tocar el pom.
+    -->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-math3</artifactId>
