@@ -48,6 +48,8 @@ public class Main {
 
         double[] y = {200, 150};
 
+        Reporte.imprimirMatriz("I - A", Leontief.matrizTecnologica(a));
+
         double[] x = Leontief.produccion(a, y);
 
         Reporte.imprimirVector("Vector de producción x", sectores, x);
@@ -115,6 +117,8 @@ public class Main {
         };
 
         double[] y = {100, 150, 80, 120};
+
+        Reporte.imprimirMatriz("I - A", Leontief.matrizTecnologica(a));
 
         double[] x = Leontief.produccion(a, y);
 

@@ -8,10 +8,9 @@ import tp4.algebra.SistemaLineal;
 // comentada en LeontiefApacheCommonsMath.java, en este mismo paquete.
 public class Leontief {
 
-    // Resuelve x = (I - A)^-1 · y planteando y resolviendo (I - A)·x = y por
-    // eliminación de Gauss con pivoteo parcial (ver SistemaLineal), sin
-    // invertir la matriz.
-    public static double[] produccion(double[][] a, double[] y) {
+    // Arma I - A (matriz técnica). Se expone aparte para poder mostrarla
+    // (por ejemplo, para comparar contra el informe) antes de resolver el sistema.
+    public static double[][] matrizTecnologica(double[][] a) {
 
         int n = a.length;
         double[][] iMenosA = new double[n][n];
@@ -22,7 +21,15 @@ public class Leontief {
             }
         }
 
-        return SistemaLineal.resolver(iMenosA, y);
+        return iMenosA;
+    }
+
+    // Resuelve x = (I - A)^-1 · y planteando y resolviendo (I - A)·x = y por
+    // eliminación de Gauss con pivoteo parcial (ver SistemaLineal), sin
+    // invertir la matriz.
+    public static double[] produccion(double[][] a, double[] y) {
+
+        return SistemaLineal.resolver(matrizTecnologica(a), y);
     }
 
     // Aplica una inversa (I - A)^-1 ya conocida a un vector: producción total,

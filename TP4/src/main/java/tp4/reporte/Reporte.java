@@ -13,6 +13,20 @@ public class Reporte {
         }
     }
 
+    // Imprime una matriz (ej. I - A) para poder comparar contra el desarrollo del informe.
+    public static void imprimirMatriz(String titulo, double[][] m) {
+
+        System.out.println(titulo + ":");
+
+        for (double[] fila : m) {
+            System.out.print(" ");
+            for (double valor : fila) {
+                System.out.printf(" %7.2f", valor);
+            }
+            System.out.println();
+        }
+    }
+
     // Versión equivalente para cuando se usa la librería (Leontief.produccion/aplicarInversa
     // devuelven RealVector en vez de double[]):
     //
