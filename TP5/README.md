@@ -21,7 +21,7 @@ Depredador-Presa (Lotka-Volterra), analizado y simulado numéricamente.
   alrededor del equilibrio de coexistencia).
 
 Los diagramas y gráficos son paneles Swing con `Graphics2D` puro (sin librerías de
-diagramado ni de graficado), exportados a PNG en `graficos/`. El integrador RK4 del
+diagramado ni de graficado), exportados a PNG en `graficos/` sin abrir ventanas. El integrador RK4 del
 Ejercicio 5 usa [Apache Commons Math](https://commons.apache.org/proper/commons-math/)
 (`ClassicalRungeKuttaIntegrator`) — la versión equivalente escrita a mano, sin
 librerías, está en `RungeKutta4SinLibreria.java`, comentada a modo de alternativa (con
@@ -31,7 +31,13 @@ instrucciones de cómo probarla). Da exactamente los mismos resultados numérico
 
 ```
 src/main/java/tp5/
-├── Main.java                     # los 5 ejercicios: parámetros y llamadas
+├── Main.java                     # punto de entrada: llama a cada ejercicio en orden
+├── ejercicios/
+│   ├── Ejercicio1.java           # Enfriamiento de Newton (+ variación de Tamb y k)
+│   ├── Ejercicio2.java           # Malthus (+ variación de r y P0)
+│   ├── Ejercicio3.java           # Decaimiento radiactivo (+ variación de λ y N0)
+│   ├── Ejercicio4.java           # diagramas en bloques de los 6 sistemas
+│   └── Ejercicio5.java           # Lotka-Volterra: equilibrios, RK4 y gráficos
 ├── modelos/
 │   └── ModelosExponenciales.java # soluciones cerradas de los Ejercicios 1-3
 ├── edo/
@@ -45,7 +51,8 @@ src/main/java/tp5/
     ├── Curva.java                # función + etiqueta + color, para graficar
     ├── GraficoFuncion.java       # grafica una o más curvas y=f(t)
     ├── GraficoFase.java          # grafica una trayectoria paramétrica (x(t),y(t)) cerrada
-    └── VentanaGrafico.java       # ventana Swing + export a PNG (para cualquier JPanel)
+    ├── GraficosComparativos.java # familia de curvas variando un parámetro (sensibilidad)
+    └── VentanaGrafico.java       # guarda cualquier JPanel como PNG y muestra el cartel final
 ```
 
 ## Cómo correrlo
@@ -57,8 +64,9 @@ mvn compile
 mvn exec:java -Dexec.mainClass=tp5.Main
 ```
 
-Los resultados numéricos se imprimen por consola y los gráficos quedan en
-`graficos/`. El programa queda a la espera hasta que se cierren las ventanas abiertas.
+Los resultados numéricos se imprimen por consola y los gráficos se guardan como PNG en
+`graficos/` (no se abre una ventana por gráfico). Al terminar aparece un único cartel
+que indica revisar la carpeta `graficos`.
 
 ## Ejercicios
 

@@ -14,20 +14,7 @@ public class VentanaGrafico {
 
     private static final String CARPETA_SALIDA = "graficos";
 
-    public static void mostrar(String tituloVentana, JPanel grafico, String nombreArchivo) {
-
-        JFrame ventana = new JFrame("TP5 - " + tituloVentana);
-
-        ventana.add(grafico);
-        ventana.setSize(ANCHO, ALTO);
-        ventana.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        ventana.setLocationByPlatform(true);
-        ventana.setVisible(true);
-
-        guardarImagen(grafico, nombreArchivo);
-    }
-
-    private static void guardarImagen(JPanel grafico, String nombreArchivo) {
+    public static void guardar(JPanel grafico, String nombreArchivo) {
 
         grafico.setSize(ANCHO, ALTO);
 
@@ -44,12 +31,22 @@ public class VentanaGrafico {
 
         try {
             ImageIO.write(imagen, "png", archivo);
-            System.out.println("Imagen guardada: " + archivo.getPath());
+            System.out.println("Imagen guardada: " + archivo.getAbsolutePath());
 
         } catch (IOException e) {
             System.out.println(
                     "No se pudo guardar la imagen de " + nombreArchivo + ": " + e.getMessage()
             );
         }
+    }
+
+    // Cartel único al finalizar, en lugar de una ventana por gráfico.
+    public static void avisarFinalizacion() {
+        JOptionPane.showMessageDialog(
+                null,
+                "Resultados generados.\nRevisar la carpeta graficos:\n" + new File(CARPETA_SALIDA).getAbsolutePath(),
+                "TP5 - Modelos y Simulación",
+                JOptionPane.INFORMATION_MESSAGE
+        );
     }
 }
