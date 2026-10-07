@@ -16,7 +16,7 @@ scilab/
 
 ## Cómo se arma cada diagrama
 
-Mismo esquema que el diagrama de Java (`tp5.diagrama.DiagramaBloques`):
+Cada diagrama sigue este esquema (un sumador, un integrador y un lazo de ganancia por coeficiente no nulo):
 
 | Bloque Xcos | Para qué |
 |---|---|
