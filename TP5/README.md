@@ -68,6 +68,13 @@ Los resultados numéricos se imprimen por consola y los gráficos se guardan com
 `graficos/` (no se abre una ventana por gráfico). Al terminar aparece un único cartel
 que indica revisar la carpeta `graficos`.
 
+## Ejercicio 4 también en Scilab/Xcos (opcional del TP)
+
+Además del dibujo con `Graphics2D` de Java, los 6 sistemas están armados como diagramas de
+**Xcos** (software libre, alternativa a Simulink) en la carpeta `scilab/`: archivos `.zcos` listos
+para abrir y simular, y un script que los genera y los verifica contra la solución exacta. Ver
+`scilab/README.md`.
+
 ## Ejercicios
 
 | Ejercicio | Modelo | Qué hace el programa |
