@@ -11,19 +11,16 @@ modelo Depredador-Presa (Lotka-Volterra), analizado y simulado numéricamente.
   fórmula para un juego de parámetros de ejemplo y se grafica la curva resultante.
 - **Ejercicio 4**: los 6 diagramas en bloques se resuelven en **Scilab/Xcos**, no en Java
   (ver la carpeta `scilab/` y su `README.md`).
-- **Ejercicio 5 (Lotka-Volterra)**: sistema no lineal sin solución cerrada. Se calculan
-  los puntos de equilibrio `(0,0)` y `(γ/δ, α/β)` y se los clasifica analíticamente
-  (punto silla y centro, respectivamente — ver el informe para la linealización). Como
-  no hay fórmula cerrada, además se integra numéricamente con **Runge-Kutta de orden 4**
-  y se grafican las poblaciones vs. tiempo y el retrato de fase (la órbita cerrada
-  alrededor del equilibrio de coexistencia).
+- **Ejercicio 5 (Lotka-Volterra)**: sistema no lineal sin solución con fórmula, así que se
+  resuelve **paso a paso** con el método de **Runge-Kutta de orden 4**, usando el integrador
+  `ClassicalRungeKuttaIntegrator` de [Apache Commons Math](https://commons.apache.org/proper/commons-math/).
+  Todo está en un solo archivo, `Ejercicio5.java`, pensado para leerse de arriba hacia abajo:
+  datos → ecuaciones → punto de equilibrio → simulación → gráficos. Los gráficos (poblaciones
+  vs. tiempo y retrato de fase) se hacen con [JFreeChart](https://www.jfree.org/jfreechart/).
+  El análisis teórico (equilibrios, linealización, cantidad conservada) está en el informe.
 
-Los gráficos son paneles Swing con `Graphics2D` puro (sin librerías de graficado),
-exportados a PNG en `graficos/` sin abrir ventanas. El integrador RK4 del
-Ejercicio 5 usa [Apache Commons Math](https://commons.apache.org/proper/commons-math/)
-(`ClassicalRungeKuttaIntegrator`) — la versión equivalente escrita a mano, sin
-librerías, está en `RungeKutta4SinLibreria.java`, comentada a modo de alternativa (con
-instrucciones de cómo probarla). Da exactamente los mismos resultados numéricos.
+Los gráficos de los ejercicios 1 a 3 son paneles Swing con `Graphics2D` propio; los del ejercicio 5
+usan JFreeChart. Todos se exportan a PNG en `graficos/` sin abrir ventanas.
 
 ## Estructura
 
@@ -34,18 +31,12 @@ src/main/java/tp5/
 │   ├── Ejercicio1.java           # Enfriamiento de Newton (+ variación de Tamb y k)
 │   ├── Ejercicio2.java           # Malthus (+ variación de r y P0)
 │   ├── Ejercicio3.java           # Decaimiento radiactivo (+ variación de λ y N0)
-│   └── Ejercicio5.java           # Lotka-Volterra: equilibrios, RK4 y gráficos
+│   └── Ejercicio5.java           # Lotka-Volterra: ecuaciones, simulación RK4 y gráficos (todo en un archivo)
 ├── modelos/
 │   └── ModelosExponenciales.java # soluciones cerradas de los Ejercicios 1-3
-├── edo/
-│   ├── SistemaEDO.java           # interfaz: dado (t, estado) devuelve la derivada
-│   ├── RungeKutta4.java          # ACTIVA: integrador RK4 con Apache Commons Math
-│   ├── RungeKutta4SinLibreria.java # alternativa sin librerías (RK4 a mano), comentada
-│   └── LotkaVolterra.java        # sistema Depredador-Presa (Ejercicio 5)
 └── grafico/
     ├── Curva.java                # función + etiqueta + color, para graficar
     ├── GraficoFuncion.java       # grafica una o más curvas y=f(t)
-    ├── GraficoFase.java          # grafica una trayectoria paramétrica (x(t),y(t)) cerrada
     ├── GraficosComparativos.java # familia de curvas variando un parámetro (sensibilidad)
     └── VentanaGrafico.java       # guarda cualquier JPanel como PNG y muestra el cartel final
 ```
@@ -77,7 +68,7 @@ y los verifica contra la solución exacta. Ver `scilab/README.md`.
 | 2 | Crecimiento de Malthus | `P(t) = P0·e^(rt)`, gráfico de la curva |
 | 3 | Decaimiento radiactivo | `N(t) = N0·e^(-λt)`, gráfico de la curva y vida media |
 | 4 | 6 sistemas lineales (a-f) | resuelto en Scilab/Xcos (carpeta `scilab/`), no en Java |
-| 5 | Lotka-Volterra | equilibrios + clasificación (analítico), simulación RK4 y gráficos |
+| 5 | Lotka-Volterra | equilibrio, simulación RK4 (Commons Math) y gráficos (JFreeChart) |
 
 El desarrollo matemático completo (separación de variables, matriz jacobiana,
 cantidad conservada) está en `../../TP5-Informe-Completo.docx` / `.pdf`.

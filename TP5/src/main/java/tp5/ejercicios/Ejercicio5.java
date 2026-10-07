@@ -1,111 +1,135 @@
 package tp5.ejercicios;
 
-import tp5.edo.LotkaVolterra;
-import tp5.edo.RungeKutta4;
-import tp5.grafico.Curva;
-import tp5.grafico.GraficoFase;
-import tp5.grafico.GraficoFuncion;
-import tp5.grafico.VentanaGrafico;
+import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
+import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtils;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 import tp5.reporte.Reporte;
 
 import java.awt.Color;
-import java.util.Arrays;
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
 
-// EJERCICIO 5: Modelo Depredador-Presa (Lotka-Volterra) — sin solución cerrada:
-// se clasifican los puntos de equilibrio y se integra numéricamente (Runge-Kutta 4).
-//   dx/dt = α·x - β·x·y   (x = presas)
-//   dy/dt = δ·x·y - γ·y   (y = depredadores)
+/*
+  EJERCICIO 5: Modelo Depredador-Presa (Lotka-Volterra)
+
+      dx/dt = α·x − β·x·y        x = presas
+      dy/dt = δ·x·y − γ·y        y = depredadores
+
+   Estas ecuaciones no tienen una fórmula que dé x(t) e y(t), así que se calculan "paso a paso":
+   desde la situación inicial se avanza un instante chico, se obtiene la nueva situación, y se repite.
+  Eso lo hace un integrador de Runge-Kutta de orden 4 que ya trae la librería Apache Commons Math.
+ */
 public class Ejercicio5 {
 
     public static void ejecutar() {
 
         Reporte.titulo("Ejercicio 5: Depredador-Presa (Lotka-Volterra)");
 
-        // Parámetros del modelo (valores clásicos de ejemplo)
-        double alfa = 1.0;    // α: tasa de crecimiento natural de las presas (sin depredadores)
-        double beta = 0.1;    // β: tasa de depredación (cuánto reducen las presas los encuentros con depredadores)
-        double delta = 0.075; // δ: eficiencia con que los depredadores convierten presas comidas en nuevos depredadores
-        double gama = 1.5;    // γ: tasa de mortalidad de los depredadores (sin presas se extinguen)
+        // 1) Datos del problema (valores de ejemplo)
+        final double alfa = 1.0;     // α: cuánto crecen las presas por sí solas
+        final double beta = 0.1;     // β: cuántas presas se pierden por cada encuentro con un depredador
+        final double delta = 0.075;  // δ: cuántos depredadores nuevos nacen por cada presa comida
+        final double gama = 1.5;     // γ: cuántos depredadores mueren (si no hay presas para comer)
 
-        LotkaVolterra sistema = new LotkaVolterra(alfa, beta, delta, gama);
+        double[] estado = {10, 5};   // situación inicial: 10 presas y 5 depredadores
+        double tiempoFinal = 60;
 
-        Reporte.linea("dx/dt = α·x - β·x·y,  dy/dt = δ·x·y - γ·y   (α=" + alfa + ", β=" + beta + ", δ=" + delta + ", γ=" + gama + ")");
-        Reporte.linea("Puntos de equilibrio: (0,0) y (x*,y*) = (γ/δ, α/β)");
-        // Equilibrio de coexistencia: población de presas y depredadores a la que ambas quedarían constantes
-        Reporte.valor("x* = γ/δ", sistema.equilibrioX());
-        Reporte.valor("y* = α/β", sistema.equilibrioY());
-        // Clasificación según los autovalores de la matriz jacobiana en cada equilibrio (ver informe)
-        Reporte.linea("Clasificación: (0,0) es punto silla (autovalores α=" + alfa + " y -γ=" + (-gama) + ", signos opuestos).");
-        Reporte.linea("(x*,y*) es un centro (autovalores imaginarios puros ±i·sqrt(α·γ) = ±i·" + String.format("%.4f", Math.sqrt(alfa * gama)) + ").");
+        // 2) Las ecuaciones: dado cómo están hoy las poblaciones, ¿cuánto está cambiando cada una? */
+        FirstOrderDifferentialEquations ecuaciones = new FirstOrderDifferentialEquations() {
 
-        // Configuración de la simulación numérica (Runge-Kutta de orden 4)
-        double t0 = 0;                          // tiempo inicial
-        double[] estadoInicial = {10, 5};       // condición inicial: x0 = 10 presas, y0 = 5 depredadores
-        double h = 0.01;                        // paso de integración (cuanto menor, más preciso)
-        int pasos = 6000;                       // cantidad de pasos: tiempo final = pasos * h = 60
+            public int getDimension() {
+                return 2;   // dos incógnitas: presas y depredadores
+            }
 
-        // Resultado: una fila por paso, con columnas [t, x(t), y(t)]
-        double[][] trayectoria = RungeKutta4.resolver(sistema, t0, estadoInicial, h, pasos);
+            public void computeDerivatives(double t, double[] y, double[] cambio) {
+                double presas = y[0];
+                double depredadores = y[1];
+                cambio[0] = alfa * presas - beta * presas * depredadores;        // dx/dt
+                cambio[1] = delta * presas * depredadores - gama * depredadores; // dy/dt
+            }
+        };
 
-        // Estado final de la simulación (t = 60): última fila de la trayectoria
-        Reporte.valor("x(60) [presas]", trayectoria[pasos][1]);
-        Reporte.valor("y(60) [depredadores]", trayectoria[pasos][2]);
-        System.out.println();
+        // 3) Punto de equilibrio: las poblaciones donde nada cambia (dx/dt = 0 y dy/dt = 0)
+        double presasEquilibrio = gama / delta;
+        double depredadoresEquilibrio = alfa / beta;
+        Reporte.linea("Equilibrio de coexistencia: presas = γ/δ, depredadores = α/β");
+        Reporte.valor("presas", presasEquilibrio);
+        Reporte.valor("depredadores", depredadoresEquilibrio);
 
-        // Gráfico 1 — Poblaciones vs. tiempo: dos curvas, x(t) (columna 1) e y(t) (columna 2)
-        List<Curva> curvasTiempo = Arrays.asList(
-                new Curva(t -> interpolar(trayectoria, t, 1), "x(t) - presas", new Color(50, 130, 60)),
-                new Curva(t -> interpolar(trayectoria, t, 2), "y(t) - depredadores", new Color(200, 60, 40))
-        );
+        /*
+          4) Simulación: se avanza de a 0.05 unidades de tiempo hasta llegar a 60,
+              anotando en cada paso cuántas presas y depredadores hay.
+         */
+        ClassicalRungeKuttaIntegrator integrador = new ClassicalRungeKuttaIntegrator(0.01);
 
-        // Eje t de 0 a 60 (pasos * h)
-        GraficoFuncion graficoTiempo = new GraficoFuncion(
-                "Ejercicio 5 - Poblaciones vs. tiempo", 0, pasos * h, curvasTiempo, "t", "población"
-        );
+        XYSeries presas = new XYSeries("Presas");
+        XYSeries depredadores = new XYSeries("Depredadores");
+        XYSeries orbita = new XYSeries("Órbita", false);   // false = respetar el orden de los puntos
 
-        VentanaGrafico.guardar(graficoTiempo, "Ejercicio5_Poblaciones");
+        presas.add(0, estado[0]);
+        depredadores.add(0, estado[1]);
+        orbita.add(estado[0], estado[1]);
 
-        // Gráfico 2 — Retrato de fase: la órbita (x(t), y(t)) es una curva cerrada, no una función de x,
-        // así que se grafica como trayectoria paramétrica (ver GraficoFase).
-        double[] xs = new double[trayectoria.length];   // todas las poblaciones de presas, en orden temporal
-        double[] ys = new double[trayectoria.length];   // todas las poblaciones de depredadores, en orden temporal
-        for (int i = 0; i < trayectoria.length; i++) {
-            xs[i] = trayectoria[i][1];
-            ys[i] = trayectoria[i][2];
+        double paso = 0.05;
+        int cantidadDePasos = (int) Math.round(tiempoFinal / paso);
+
+        for (int i = 1; i <= cantidadDePasos; i++) {
+
+            // avanza el estado de (i-1)*paso a i*paso; deja el resultado en el mismo arreglo "estado"
+            integrador.integrate(ecuaciones, (i - 1) * paso, estado, i * paso, estado);
+
+            double t = i * paso;
+            presas.add(t, estado[0]);
+            depredadores.add(t, estado[1]);
+            orbita.add(estado[0], estado[1]);
         }
 
-        // El último argumento es el punto de equilibrio (x*, y*), que se marca en rojo en el gráfico
-        GraficoFase graficoFase = new GraficoFase(
-                "Ejercicio 5 - Retrato de fase",
-                xs, ys,
-                "x (presas)", "y (depredadores)",
-                new double[]{sistema.equilibrioX(), sistema.equilibrioY()}
-        );
+        Reporte.valor("presas a t=60", estado[0]);
+        Reporte.valor("depredadores a t=60", estado[1]);
+        System.out.println();
 
-        VentanaGrafico.guardar(graficoFase, "Ejercicio5_RetratoFase");
+        // Gráficos
+
+        // Poblaciones a lo largo del tiempo (dos curvas)
+        XYSeriesCollection poblaciones = new XYSeriesCollection();
+        poblaciones.addSeries(presas);
+        poblaciones.addSeries(depredadores);
+        JFreeChart graficoPoblaciones = ChartFactory.createXYLineChart(
+                "Ejercicio 5 - Poblaciones vs. tiempo", "tiempo", "población", poblaciones);
+        graficoPoblaciones.getXYPlot().getRenderer().setSeriesPaint(0, new Color(50, 130, 60));   /* presas: verde */
+        graficoPoblaciones.getXYPlot().getRenderer().setSeriesPaint(1, new Color(200, 60, 40));   /* depredadores: rojo */
+        guardar(graficoPoblaciones, "Ejercicio5_Poblaciones");
+
+        /*
+          Retrato de fase: depredadores en función de presas (sin mostrar el tiempo).
+          Da una curva cerrada alrededor del equilibrio: las poblaciones oscilan para siempre.
+         */
+        guardar(ChartFactory.createXYLineChart(
+                "Ejercicio 5 - Retrato de fase (equilibrio en " + presasEquilibrio + " presas, "
+                        + depredadoresEquilibrio + " depredadores)",
+                "presas", "depredadores", new XYSeriesCollection(orbita)),
+                "Ejercicio5_RetratoFase");
     }
 
-    // La simulación solo calcula puntos discretos (uno cada h); para graficar una curva continua
-    // se interpola linealmente entre dos puntos vecinos de la trayectoria.
-    // Parámetros: trayectoria = matriz [t, x, y] de la simulación, t = instante a evaluar,
-    // col = qué variable devolver (1 = x presas, 2 = y depredadores).
-    private static double interpolar(double[][] trayectoria, double t, int col) {
+    // Guarda un gráfico como PNG dentro de la carpeta graficos/
+    private static void guardar(JFreeChart grafico, String nombreArchivo) {
 
-        int n = trayectoria.length;
-        double t0 = trayectoria[0][0];
-        double h = trayectoria[1][0] - t0;   // paso de la simulación (separación entre filas)
+        grafico.getXYPlot().setBackgroundPaint(Color.WHITE);   /* fondo blanco (por defecto es gris) */
+        grafico.getXYPlot().setDomainGridlinePaint(Color.LIGHT_GRAY);
+        grafico.getXYPlot().setRangeGridlinePaint(Color.LIGHT_GRAY);
 
-        // Índice del punto de la simulación inmediatamente anterior a t (acotado a los extremos)
-        int i = (int) ((t - t0) / h);
-        if (i < 0) i = 0;
-        if (i >= n - 1) i = n - 2;
+        File archivo = new File("graficos", nombreArchivo + ".png");
+        archivo.getParentFile().mkdirs();
 
-        double tA = trayectoria[i][0];
-        double frac = (t - tA) / h;          // qué fracción del tramo [i, i+1] ya recorrió t (0 a 1)
-
-        // Valor = punto anterior + fracción * (diferencia con el punto siguiente)
-        return trayectoria[i][col] + frac * (trayectoria[i + 1][col] - trayectoria[i][col]);
+        try {
+            ChartUtils.saveChartAsPNG(archivo, grafico, 800, 500);
+            System.out.println("Imagen guardada: " + archivo.getAbsolutePath());
+        } catch (IOException e) {
+            System.out.println("No se pudo guardar " + nombreArchivo + ": " + e.getMessage());
+        }
     }
-
 }
