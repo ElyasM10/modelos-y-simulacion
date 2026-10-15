@@ -1,0 +1,81 @@
+package tp6.ejercicios;
+
+import org.jfree.chart.JFreeChart;
+import tp6.datos.Medicion;
+import tp6.datos.Registros;
+import tp6.grafico.ConstructorGraficos;
+import tp6.grafico.Graficos;
+import tp6.modelo.AjusteCole;
+import org.apache.commons.math3.complex.Complex;
+import tp6.modelo.ModeloCole;
+
+import java.io.IOException;
+
+/*
+  EJERCICIO 3: Ajuste del Modelo de Cole a mediciones reales de la base de datos de Dell'Osa et al. (Zenodo).
+
+  Se eligieron 4 registros (ver datos/README.md): 2 de tejido humano y 2 de un fantoma de agar-agar.
+  Para cada uno, el ajuste por mínimos cuadrados no lineales (Levenberg-Marquardt de Commons Math, clase
+  tp6.modelo.AjusteCole) devuelve R0, Rinf, fc y α, y se grafica la medición junto con la curva ajustada.
+ */
+public class Ejercicio3 {
+
+    public static void ejecutar() {
+
+        System.out.println("=== Ejercicio 3: Ajuste del Modelo de Cole a datos reales ===");
+        System.out.printf("  %-36s %8s %8s %11s %6s %9s%n", "registro", "R0[Ω]", "Rinf[Ω]", "fc[Hz]", "α", "error[Ω]");
+
+        for (int k = 0; k < Registros.ARCHIVOS.length; k++) {
+            try {
+                Medicion med = Registros.leer(k);
+                AjusteCole ajuste = AjusteCole.ajustar(med.getF(), med.getRe(), med.getIm());
+                ModeloCole m = ajuste.getModelo();
+
+                System.out.printf("  %-36s %8.2f %8.2f %11.1f %6.3f %9.3f%n",
+                        med.getNombre(), m.getR0(), m.getRInf(), m.getFc(), m.getAlfa(), ajuste.getRmse());
+
+                JFreeChart[] g = ConstructorGraficos.ajuste(med.getNombre(), med.getF(), med.getRe(), med.getIm(), m);
+                Graficos.guardar(g[0], "Ejercicio3_" + Registros.ARCHIVOS[k] + "_Nyquist");
+                Graficos.guardar(g[1], "Ejercicio3_" + Registros.ARCHIVOS[k] + "_Modulo");
+
+            } catch (IOException e) {
+                System.out.println("  No se pudo leer " + Registros.ARCHIVOS[k] + ": " + e.getMessage());
+            }
+        }
+        System.out.println();
+
+        validarConDatosSinteticos();
+    }
+
+    /*
+      Validación del ajuste: se generan mediciones "falsas" con el modelo de Cole usando los parámetros de la
+      Tabla 1 (100 frecuencias entre 10 Hz y 1 GHz), se les agrega ruido gaussiano del 1 % del módulo de Z y se
+      comprueba que el ajuste recupere los parámetros originales.
+     */
+    private static void validarConDatosSinteticos() {
+
+        System.out.println("=== Validación del ajuste con datos sintéticos (ruido 1 %) ===");
+        System.out.printf("  %-15s %-28s %-28s%n", "tejido", "real (R0, Rinf, fc, α)", "ajustado (R0, Rinf, fc, α)");
+
+        java.util.Random azar = new java.util.Random(42);   // semilla fija: el resultado se repite
+        java.util.List<tp6.modelo.Tejido> tejidos = Ejercicio2.tabla1();
+
+        for (tp6.modelo.Tejido t : tejidos) {
+            ModeloCole real = t.getModelo();
+            int n = 100;
+            double[] f = new double[n], re = new double[n], im = new double[n];
+            for (int i = 0; i < n; i++) {
+                f[i] = 10 * Math.pow(1e8, i / (n - 1.0));
+                Complex z = real.impedancia(f[i]);
+                double ruido = 0.01 * z.abs();
+                re[i] = z.getReal() + ruido * azar.nextGaussian();
+                im[i] = z.getImaginary() + ruido * azar.nextGaussian();
+            }
+            ModeloCole aj = AjusteCole.ajustar(f, re, im).getModelo();
+            System.out.printf("  %-15s %-28s %-28s%n", t.getNombre(),
+                    String.format("%.0f, %.0f, %.0f, %.2f", real.getR0(), real.getRInf(), real.getFc(), real.getAlfa()),
+                    String.format("%.1f, %.1f, %.0f, %.3f", aj.getR0(), aj.getRInf(), aj.getFc(), aj.getAlfa()));
+        }
+        System.out.println();
+    }
+}
