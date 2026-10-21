@@ -20,13 +20,14 @@ import java.util.List;
  */
 public class Ejercicio2 {
 
-    // Tabla 1 del enunciado
+    // Tabla 1 del enunciado: un valor por tejido, en el mismo orden en las 5 listas
     public static final String[] NOMBRES = {"Músculo long.", "Músculo trans.", "Hígado", "Pulmón", "Bazo"};
     public static final double[] R0 = {385, 730, 540, 440, 550};     // [Ω]
     public static final double[] R_INF = {70, 75, 100, 70, 60};      // [Ω]
     public static final double[] FC = {37e3, 27e3, 72e3, 100e3, 373e3};   // [Hz]
     public static final double[] ALFA = {0.27, 0.24, 0.45, 0.59, 0.36};
 
+    // Arma la lista de los 5 tejidos con sus modelos (la usan la consola y la interfaz)
     public static List<Tejido> tabla1() {
         List<Tejido> tejidos = new ArrayList<Tejido>();
         for (int t = 0; t < NOMBRES.length; t++) {
@@ -40,6 +41,8 @@ public class Ejercicio2 {
         System.out.println("=== Ejercicio 2: Modelo de Cole para 5 tejidos ===");
 
         List<Tejido> tejidos = tabla1();
+
+        // por cada tejido, imprimo sus parámetros y la impedancia justo en su fc
         for (int t = 0; t < tejidos.size(); t++) {
             Complex enFc = tejidos.get(t).getModelo().impedancia(FC[t]);
             System.out.printf("  %-15s R0=%5.0f  Rinf=%4.0f  fc=%6.0f Hz  α=%.2f  |  Z(fc) = %.2f %s j·%.2f Ω%n",
@@ -47,7 +50,7 @@ public class Ejercicio2 {
                     enFc.getReal(), enFc.getImaginary() < 0 ? "-" : "+", Math.abs(enFc.getImaginary()));
         }
 
-        // espectro común: de 10 Hz a 1 GHz
+        // espectro común para los 5: de 10 Hz a 1 GHz (si cada uno usara un rango distinto no se podrían comparar)
         JFreeChart[] g = ConstructorGraficos.espectro("Ejercicio 2", tejidos, 10, 1e9);
         Graficos.guardar(g[0], "Ejercicio2_Modulo");
         Graficos.guardar(g[1], "Ejercicio2_Fase");

@@ -1,6 +1,7 @@
 package tp6.modelo;
 
-// Un tejido (o muestra) con nombre y los parámetros de su modelo de Cole
+// Un tejido: simplemente un nombre ("Hígado", "Pulmón"...) pegado a su modelo de Cole.
+// Sirve para poder graficar varios juntos con su etiqueta en la leyenda.
 public class Tejido {
 
     private final String nombre;

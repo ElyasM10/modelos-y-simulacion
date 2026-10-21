@@ -20,6 +20,7 @@ import java.io.IOException;
  */
 public class Ejercicio3 {
 
+    // Ajusta los 4 registros uno por uno, imprime los parámetros y guarda los gráficos
     public static void ejecutar() {
 
         System.out.println("=== Ejercicio 3: Ajuste del Modelo de Cole a datos reales ===");
@@ -27,13 +28,15 @@ public class Ejercicio3 {
 
         for (int k = 0; k < Registros.ARCHIVOS.length; k++) {
             try {
-                Medicion med = Registros.leer(k);
+                Medicion med = Registros.leer(k);   // leo el CSV
+                // busco R0, Rinf, fc y α que mejor calzan con la medición
                 AjusteCole ajuste = AjusteCole.ajustar(med.getF(), med.getRe(), med.getIm());
                 ModeloCole m = ajuste.getModelo();
 
                 System.out.printf("  %-36s %8.2f %8.2f %11.1f %6.3f %9.3f%n",
                         med.getNombre(), m.getR0(), m.getRInf(), m.getFc(), m.getAlfa(), ajuste.getRmse());
 
+                // gráficos: medición (puntos) contra ajuste (línea); guardo Nyquist y módulo
                 JFreeChart[] g = ConstructorGraficos.ajuste(med.getNombre(), med.getF(), med.getRe(), med.getIm(), m);
                 Graficos.guardar(g[0], "Ejercicio3_" + Registros.ARCHIVOS[k] + "_Nyquist");
                 Graficos.guardar(g[1], "Ejercicio3_" + Registros.ARCHIVOS[k] + "_Modulo");
@@ -57,11 +60,12 @@ public class Ejercicio3 {
         System.out.println("=== Validación del ajuste con datos sintéticos (ruido 1 %) ===");
         System.out.printf("  %-15s %-28s %-28s%n", "tejido", "real (R0, Rinf, fc, α)", "ajustado (R0, Rinf, fc, α)");
 
-        java.util.Random azar = new java.util.Random(42);   // semilla fija: el resultado se repite
+        java.util.Random azar = new java.util.Random(42);   // semilla fija: así el ruido es siempre el mismo y el resultado se repite
         java.util.List<tp6.modelo.Tejido> tejidos = Ejercicio2.tabla1();
 
         for (tp6.modelo.Tejido t : tejidos) {
             ModeloCole real = t.getModelo();
+            // 100 frecuencias entre 10 Hz y 1 GHz, con la impedancia exacta del modelo + ruido
             int n = 100;
             double[] f = new double[n], re = new double[n], im = new double[n];
             for (int i = 0; i < n; i++) {
@@ -71,6 +75,7 @@ public class Ejercicio3 {
                 re[i] = z.getReal() + ruido * azar.nextGaussian();
                 im[i] = z.getImaginary() + ruido * azar.nextGaussian();
             }
+            // ahora hago de cuenta que no conozco los parámetros y trato de recuperarlos desde los datos ruidosos
             ModeloCole aj = AjusteCole.ajustar(f, re, im).getModelo();
             System.out.printf("  %-15s %-28s %-28s%n", t.getNombre(),
                     String.format("%.0f, %.0f, %.0f, %.2f", real.getR0(), real.getRInf(), real.getFc(), real.getAlfa()),
