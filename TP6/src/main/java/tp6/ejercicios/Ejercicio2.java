@@ -38,11 +38,19 @@ public class Ejercicio2 {
 
     public static void ejecutar() {
 
+        /*
+          PASO A PASO de este ejercicio:
+            1) Se arman los 5 modelos con los parámetros de la Tabla 1.
+            2) Para cada uno se calcula la impedancia justo en su fc. Ahí se cumple que la parte real vale
+               (R0 + Rinf)/2 y que la parte imaginaria es la más grande: (R0 - Rinf)/2 · tan(α·π/4).
+            3) Se calcula Z de los 5 en las mismas frecuencias (10 Hz a 1 GHz) y se grafican juntos.
+         */
         System.out.println("=== Ejercicio 2: Modelo de Cole para 5 tejidos ===");
 
+        // Paso 1
         List<Tejido> tejidos = tabla1();
 
-        // por cada tejido, imprimo sus parámetros y la impedancia justo en su fc
+        // Paso 2: por cada tejido, imprimo sus parámetros y la impedancia justo en su fc
         for (int t = 0; t < tejidos.size(); t++) {
             Complex enFc = tejidos.get(t).getModelo().impedancia(FC[t]);
             System.out.printf("  %-15s R0=%5.0f  Rinf=%4.0f  fc=%6.0f Hz  α=%.2f  |  Z(fc) = %.2f %s j·%.2f Ω%n",
@@ -50,7 +58,7 @@ public class Ejercicio2 {
                     enFc.getReal(), enFc.getImaginary() < 0 ? "-" : "+", Math.abs(enFc.getImaginary()));
         }
 
-        // espectro común para los 5: de 10 Hz a 1 GHz (si cada uno usara un rango distinto no se podrían comparar)
+        // Paso 3: espectro común para los 5: de 10 Hz a 1 GHz (si cada uno usara un rango distinto no se podrían comparar)
         JFreeChart[] g = ConstructorGraficos.espectro("Ejercicio 2", tejidos, 10, 1e9);
         Graficos.guardar(g[0], "Ejercicio2_Modulo");
         Graficos.guardar(g[1], "Ejercicio2_Fase");

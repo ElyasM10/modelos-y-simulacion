@@ -29,13 +29,19 @@ public class Ejercicio1 {
 
     public static void ejecutar() {
 
+        /*
+          PASO A PASO de este ejercicio:
+            1) Se arma el modelo con los parámetros del caso base (músculo longitudinal).
+            2) Se verifica que se comporte como dice la teoría (tres frecuencias).
+            3) Se repite el cálculo variando de a UN parámetro, para ver qué controla cada uno.
+         */
         System.out.println("=== Ejercicio 1: Modelo de Cole (comprobación con el músculo longitudinal) ===");
 
-        // armamos el modelo con los valores del caso base
+        // Paso 1: armamos el modelo con los valores del caso base
         ModeloCole musculo = new ModeloCole(R0, R_INF, FC, ALFA);
 
         /*
-          Chequeo del modelo con tres frecuencias:
+          Paso 2: chequeo del modelo con tres frecuencias:
             - muy baja: Z tiene que acercarse a R0 (385)
             - justo en fc: la parte real da el punto medio entre R0 y Rinf, o sea (385+70)/2 = 227.5
             - muy alta: Z tiene que acercarse a Rinf (70)
@@ -49,7 +55,10 @@ public class Ejercicio1 {
         System.out.println();
 
         System.out.println("=== Ejercicio 1: sensibilidad (un parámetro por vez) ===");
-        // un parámetro por vez: el resto se queda en el valor base
+        // Paso 3: un parámetro por vez; el resto se queda en el valor base. Cada línea recibe la lista de valores a probar:
+        //   R0 y Rinf (en Ω) mueven los niveles de baja y alta frecuencia
+        //   fc (en Hz) desplaza la transición a lo largo del eje de frecuencia
+        //   alfa (sin unidad) cambia la forma de la transición; 1.0 es el caso límite (un solo tiempo de relajación)
         variar("R0", "Ω", new double[]{300, 385, 500, 700}, 0);
         variar("Rinf", "Ω", new double[]{30, 70, 120, 200}, 1);
         variar("fc", "Hz", new double[]{5e3, 37e3, 200e3, 1e6}, 2);
@@ -61,6 +70,7 @@ public class Ejercicio1 {
     // Así se ve qué hace cada uno. Guarda 3 imágenes: módulo, fase y Nyquist.
     private static void variar(String parametro, String unidad, double[] valores, int cual) {
 
+        // por cada valor de la lista: armo un modelo con ese valor y los demás parámetros en su valor base
         List<Tejido> tejidos = new ArrayList<Tejido>();
         for (double v : valores) {
             double[] p = {R0, R_INF, FC, ALFA};   // arranco con los valores base...

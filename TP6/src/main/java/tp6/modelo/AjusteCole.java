@@ -41,14 +41,24 @@ public class AjusteCole {
 
     public static AjusteCole ajustar(final double[] f, final double[] re, final double[] im) {
 
-        final int n = f.length;
+        /*
+          PASO A PASO de un ajuste:
+            1) Se arma el vector de lo medido (partes reales + partes imaginarias).
+            2) Se calculan datos útiles de la medición para armar un punto de partida razonable.
+            3) Se repite 8 veces, cada una con una fc inicial distinta:
+                 a) se le dice al optimizador cómo calcular lo que predice el modelo y cómo cambia al mover cada parámetro
+                 b) Levenberg-Marquardt corrige los parámetros una y otra vez hasta que el error ya no baja
+                 c) se calcula el error medio y se descarta si los parámetros no tienen sentido físico
+            4) De las 8 vueltas, se devuelve la de menor error.
+         */
+        final int n = f.length;   // cantidad de frecuencias medidas
 
-        // Lo que queremos alcanzar: las n partes reales seguidas de las n imaginarias, en un solo vector
+        // Paso 1: lo que queremos alcanzar: las n partes reales seguidas de las n imaginarias, en un solo vector
         double[] objetivo = new double[2 * n];
         System.arraycopy(re, 0, objetivo, 0, n);
         System.arraycopy(im, 0, objetivo, n, n);
 
-        // Datos útiles para armar el punto de partida
+        // Paso 2: datos útiles para armar el punto de partida (la parte real va entre R0 y Rinf)
         double reMax = max(re);
         double reMin = min(re);
         double fMin = min(f);
@@ -56,17 +66,17 @@ public class AjusteCole {
 
         AjusteCole mejor = null;
 
-        // Se repite el ajuste 8 veces, cada una arrancando con una fc distinta (repartidas en escala logarítmica)
+        // Paso 3: se repite el ajuste 8 veces, cada una arrancando con una fc distinta (repartidas en escala logarítmica)
         for (int k = 0; k < 8; k++) {
             double fc0 = fMin * Math.pow(fMax / fMin, k / 7.0);
 
-            // Punto de partida: R0 = el mayor Re medido, Rinf = el menor, fc = la de esta vuelta, α = 0.5.
+            // Punto de partida (a): R0 = el mayor Re medido, Rinf = el menor, fc = la de esta vuelta, α = 0.5.
             // Ojo: el optimizador no trabaja con fc sino con log10(fc), porque fc varía en órdenes de magnitud.
             double[] inicio = {reMax, reMin, Math.log10(fc0), 0.5};
 
             LeastSquaresProblem problema = new LeastSquaresBuilder()
                     .start(inicio)
-                    // "model": le explicamos al optimizador cómo calcular los valores del modelo y su jacobiana
+                    // "model" (a): le explicamos al optimizador cómo calcular los valores del modelo y su jacobiana
                     .model(new org.apache.commons.math3.fitting.leastsquares.MultivariateJacobianFunction() {
                         public Pair<RealVector, RealMatrix> value(RealVector p) {
                             return evaluar(p.toArray(), f);
@@ -79,8 +89,11 @@ public class AjusteCole {
                     .build();
 
             try {
+                // (b) acá trabaja Levenberg-Marquardt: itera moviendo R0, Rinf, log10(fc) y α hasta ajustar
                 LeastSquaresOptimizer.Optimum optimo = new LevenbergMarquardtOptimizer().optimize(problema);
                 double[] p = optimo.getPoint().toArray();
+                // (c) error medio (RMSE) = √( suma de residuos² / (2n) ), en ohm.
+                //     getCost() es √(suma de residuos²); se divide por 2n porque hay n valores reales + n imaginarios
                 double rmse = Math.sqrt(optimo.getCost() * optimo.getCost() / (2.0 * n));
 
                 // Solo vale si el resultado tiene sentido físico: 0.05 < α <= 1 y R0 > Rinf >= 0
@@ -95,6 +108,7 @@ public class AjusteCole {
             }
         }
 
+        // Paso 4: si ninguna de las 8 vueltas dio algo válido, no hay ajuste
         if (mejor == null) {
             throw new IllegalStateException("No se pudo ajustar el modelo de Cole a estos datos");
         }
@@ -106,7 +120,7 @@ public class AjusteCole {
     // La jacobiana se calcula "a lo bruto": se mueve un parámetro un poquito, se recalcula y se ve la diferencia.
     private static Pair<RealVector, RealMatrix> evaluar(double[] p, double[] f) {
 
-        double[] valores = valoresModelo(p, f);
+        double[] valores = valoresModelo(p, f);   // lo que predice el modelo con los parámetros actuales
         double[][] jacobiana = new double[valores.length][4];
 
         for (int j = 0; j < 4; j++) {
