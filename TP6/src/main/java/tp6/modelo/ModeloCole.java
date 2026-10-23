@@ -32,9 +32,9 @@ import org.apache.commons.math3.complex.Complex;
       α    : qué tan aplanada es esa transición, entre 0 y 1 [sin unidad]
              (con α = 1 la transición es lo más abrupta posible; cuanto más chico, más estirada)
 
-  Ojo con el signo: el enunciado escribe "1 − (jωτ)^α", pero acá se usa "1 + (jωτ)^α", que es la forma
-  correcta de Cole. Con el menos, el denominador queda casi en cero cerca de ω·τ = 1 y salen impedancias
-  absurdas (mayores que R0).
+  Sobre el signo: la primera versión del enunciado traía "1 − (jωτ)^α" (errata de tipeo); la versión corregida
+  ("Tipeo corregido") trae "1 + (jωτ)^α", que es la que se usa acá. Con el menos, el denominador queda casi en
+  cero cerca de ω·τ = 1 y salen impedancias absurdas (mayores que R0).
  */
 public class ModeloCole {
 
